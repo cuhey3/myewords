@@ -81,8 +81,8 @@ and open the template in the editor.
           viewer.src = url;
           history.pages = history.pages.slice(history.index);
           history.index = 0;
-          updateMoveButton(0);
           history.pages.unshift(page[0]);
+          updateMoveButton(0);
           window.localStorage.setItem('historyJson', JSON.stringify(history));
           element.removeAttribute('disabled');
         }
