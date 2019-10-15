@@ -33,7 +33,9 @@ and open the template in the editor.
     <div style="float:left; margin-left: 10px;">
       ページ操作
       <br><button id="suggest" onclick="getRecommendNext(this)">おすすめ</button>
+      <br><button id="random" onclick="showSequential(this)">順番に表示</button>
       <br><button id="random" onclick="showRandom(this)">ランダム</button>
+      <br>残り<span id="sequenceRemain"></span>
       <br><button id="next" onclick="move(-1)">進む</button>
       <br><button id="prev" onclick="move(1)">戻る</button>
       <br>
@@ -55,6 +57,7 @@ and open the template in the editor.
         const word = document.getElementById('word');
         const historyJson = window.localStorage.getItem('historyJson');
         const ul = document.getElementById('stocks');
+        const sequenceRemain = document.getElementById('sequenceRemain');
         const recommendButtons = Array.from(document.querySelectorAll('.recommend'));
         let history;
         if (!historyJson) {
@@ -62,11 +65,16 @@ and open the template in the editor.
             index: 0,
             pages: ['HTML'],
             stock: [],
+            sequence: 0,
           };
           window.localStorage.setItem('historyJson', JSON.stringify(history));
         } else {
           history = JSON.parse(historyJson);
+          if (!history.sequence) {
+            history.sequence = 0;
+          }
         }
+        sequenceRemain.innerHTML = Math.max(pages.length - history.sequence - 1, 0);
         const title = history.pages[history.index];
         const page = wordToPageArray(title);
         word.innerHTML = page[0];
@@ -85,7 +93,6 @@ and open the template in the editor.
         function move(moveAmount) {
           history.index = Math.max(history.index + moveAmount, 0);
           history.index = Math.min(history.index, pages.length - 1);
-          //console.log(history.index);
           updateMoveButton(history.index);
           word.innerHTML = history.pages[history.index];
           const page = wordToPageArray(history.pages[history.index]);
@@ -211,6 +218,20 @@ and open the template in the editor.
           updateMoveButton(0);
           window.localStorage.setItem('historyJson', JSON.stringify(history));
           // element.removeAttribute('disabled');
+        }
+        function showSequential(element) {
+          const pageIndex = history.sequence % pages.length;
+          const page = pages[pageIndex];
+          word.innerHTML = page[0];
+          const url = arrayToUrl(page);
+          viewer.src = url;
+          history.pages = history.pages.slice(history.index);
+          history.index = 0;
+          history.pages.unshift(page[0]);
+          updateMoveButton(0);
+          sequenceRemain.innerHTML = Math.max(pages.length - history.sequence - 1, 0);
+          history.sequence++;
+          window.localStorage.setItem('historyJson', JSON.stringify(history));
         }
     </script>
   </body>
